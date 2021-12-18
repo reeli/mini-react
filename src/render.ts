@@ -8,7 +8,7 @@ const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode) => {
   }
 
   if (typeof current.type === "function") {
-    if (!current.props.key && current.type !== prev.type) {
+    if (!(current.props || {}).key && current.type !== prev.type) {
       setChildren(current, [current.type(current.props)]);
       commitChildren(parentEl, current._children);
       return;
@@ -29,15 +29,19 @@ const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode) => {
     return;
   }
 
-  const { children: prevChildren, key: prevKey, ...prevProps } = prev.props;
+  const {
+    children: prevChildren,
+    key: prevKey,
+    ...prevProps
+  } = prev.props || {};
   const {
     children: currentChildren,
     key: currentKey,
     ...currentProps
-  } = current.props;
+  } = current.props || {};
 
   if (current.type === "textNode") {
-    const textNode = document.createTextNode(current.props.content);
+    const textNode = document.createTextNode((current.props || {}).content);
     parentEl.insertBefore(textNode, prev._html || null);
     current._html = textNode;
     prev._html!.remove();
@@ -84,9 +88,11 @@ const setChildren = (vNode: VNode, children: any[]) => {
 
 const diffProps = (
   el: HTMLElement,
-  prevProps: VNode["props"],
-  currentProps: VNode["props"],
+  prev: VNode["props"],
+  current: VNode["props"],
 ) => {
+  const prevProps = prev || {};
+  const currentProps = current || {};
   const prevKeys = Object.keys(prevProps);
   const currentKeys = Object.keys(currentProps);
 
@@ -118,11 +124,11 @@ const diffChildren = (
   const prevChildrenMap: AnyObject = {};
 
   prevChildren?.forEach((v, idx) => {
-    prevChildrenMap[v.props.key || idx] = v;
+    prevChildrenMap[(v.props || {}).key || idx] = v;
   });
 
   currentChildren?.forEach((currentChild, idx) => {
-    const currentKey = currentChild.props["key"] || idx;
+    const currentKey = (currentChild.props || {})["key"] || idx;
     const prevChild = prevChildrenMap[currentKey] || null;
 
     diff(el, prevChild, currentChild);
@@ -155,7 +161,7 @@ const create = (
   }
 
   if (vNode.type === "textNode") {
-    const textNode = document.createTextNode(vNode.props.content);
+    const textNode = document.createTextNode((vNode.props || {}).content);
     parentEl.insertBefore(textNode, beforeEl || null);
     vNode._html = textNode;
     return;

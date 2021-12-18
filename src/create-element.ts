@@ -3,13 +3,13 @@ import {VChildNode, VNode, AnyObject} from "./types";
 
 export const createElement = (
   type: string | Function,
-  props: AnyObject = {},
-  children: VChildNode[] | null,
+  props: AnyObject|null,
+  ...children: VChildNode[]
 ) => {
   return {
     type,
     props: {
-      ...props,
+      ...(props || {}),
       children: children ? flat(children) : null,
     },
   };

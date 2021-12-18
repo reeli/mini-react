@@ -6,7 +6,7 @@ export interface VNode {
     key?: string | number;
     [key: string]: any;
     children?: VChildNode[] | null;
-  };
+  } | null;
   _children?: VNode[]; // output: type(props)
   _html?: HTMLElement | Text;
 }
