@@ -1,49 +1,52 @@
+/* @jsx createElement */
 import { createElement } from "../create-element";
 import { render } from "../render";
 
 describe("render", () => {
   it("should handle html elements when first render", () => {
     const root = document.createElement("div");
-    const vNode = createElement("div", { id: "container" }, "hello-world");
 
-    render(root, vNode);
+    render(root, <div id={"container"}>hello-world</div>);
 
     expect(root.innerHTML).toEqual(`<div id="container">hello-world</div>`);
-    // expect((root as any).vDOM._children).toEqual([
-    //   { type: "textNode", props: { content: "hello-world" } },
-    // ]);
-    // expect((root as any).vDOM._html).toBeTruthy();
   });
 
   it("should handle components when first render", () => {
     const root = document.createElement("div");
-    const Foo = (props: any) =>
-      createElement("div", null, props.name,
-        createElement("span", { id: "children" }, props.children),);
 
-    render(root, createElement(Foo, { name: "hello" }, "hello-world"));
+    const Foo = (props: any) => (
+      <div>
+        {props.name}
+        <span id={"children"}>{props.children}</span>
+      </div>
+    );
+
+    render(root, <Foo name={"hello"}>hello-world</Foo>);
 
     expect(root.innerHTML).toEqual(
       `<div>hello<span id="children">hello-world</span></div>`,
     );
-    // expect((root as any).vDOM._children).toBeTruthy();
-    // expect((root as any).vDOM._html).toBeTruthy();
   });
 
   it("should rerender html element", () => {
     const div = document.createElement("div");
-    render(div, createElement("div", { id: "my-div" }, "hello-world"));
+
+    render(div, <div id={"my-div"}>hello-world</div>);
     expect(div.innerHTML).toEqual(`<div id="my-div">hello-world</div>`);
 
-    render(div, createElement("div", { id: "my-div2" }, "hello-world2"));
+    render(div, <div id={"my-div2"}>hello-world2</div>);
     expect(div.innerHTML).toEqual(`<div id="my-div2">hello-world2</div>`);
   });
 
   it("should render html with multiple child element", () => {
     const div = document.createElement("div");
-    const child = createElement("span", { id: "content" }, "my content");
-    render(div, createElement("div", { id: "my-div" }, child));
 
+    render(
+      div,
+      <div id={"my-div"}>
+        <span id={"content"}>my content</span>
+      </div>,
+    );
     expect(div.innerHTML).toEqual(
       `<div id="my-div"><span id="content">my content</span></div>`,
     );
@@ -51,16 +54,25 @@ describe("render", () => {
 
   it("should render VNode to html with VNode children", () => {
     const div = document.createElement("div");
-    const child = createElement("span", { id: "content" }, "my content");
 
-    render(div, createElement("div", { id: "my-div" }, child));
+    render(
+      div,
+      <div id="my-div">
+        <span id="content">my content</span>
+      </div>,
+    );
     expect(div.innerHTML).toEqual(
       `<div id="my-div"><span id="content">my content</span></div>`,
     );
 
     const preDiv = div.querySelector("#my-div");
 
-    render(div, createElement("div", { id: "my-div-2" }, child));
+    render(
+      div,
+      <div id="my-div-2">
+        <span id="content">my content</span>
+      </div>,
+    );
     expect(div.innerHTML).toEqual(
       `<div id="my-div-2"><span id="content">my content</span></div>`,
     );
@@ -70,34 +82,47 @@ describe("render", () => {
 
   it("should render new added attributes", () => {
     const div = document.createElement("div");
-    const child = createElement("span", { id: "content" }, "my content");
 
-    render(div, createElement("div", { id: "my-div" }, child));
+    render(
+      div,
+      <div id="my-div">
+        <span id="content">my content</span>
+      </div>,
+    );
     expect(div.innerHTML).toEqual(
       `<div id="my-div"><span id="content">my content</span></div>`,
     );
 
     render(
       div,
-      createElement("div", { id: "my-div-2", name: "good" }, child),
+      <div id="my-div-2" role="good">
+        <span id="content">my content</span>
+      </div>,
     );
     expect(div.innerHTML).toEqual(
-      `<div id="my-div-2" name="good"><span id="content">my content</span></div>`,
+      `<div id="my-div-2" role="good"><span id="content">my content</span></div>`,
     );
   });
 
   it("should diff single child", () => {
     const div = document.createElement("div");
-    const child1 = createElement("span", { id: "content" }, "my content");
 
-    render(div, createElement("div", { id: "my-div" }, child1));
+    render(
+      div,
+      <div id="my-div">
+        <span id="content">my content</span>
+      </div>,
+    );
     expect(div.innerHTML).toEqual(
       `<div id="my-div"><span id="content">my content</span></div>`,
     );
 
-    const child2 = createElement("span", { id: "content2" }, "my content2");
-
-    render(div, createElement("div", { id: "my-div-2" }, child2));
+    render(
+      div,
+      <div id="my-div-2">
+        <span id="content2">my content2</span>
+      </div>,
+    );
     expect(div.innerHTML).toEqual(
       `<div id="my-div-2"><span id="content2">my content2</span></div>`,
     );
@@ -105,10 +130,14 @@ describe("render", () => {
 
   it("should diff with multiple child", () => {
     const root = document.createElement("div");
-    const child1 = createElement("span", { id: "content1" }, "1");
-    const child2 = createElement("span", { id: "content2" }, "2");
 
-    render(root, createElement("div", { id: "root" }, child1, child2));
+    render(
+      root,
+      <div id="root">
+        <span id="content1">1</span>
+        <span id="content2">2</span>
+      </div>,
+    );
     expect(root.innerHTML).toEqual(
       `<div id="root"><span id="content1">1</span><span id="content2">2</span></div>`,
     );
@@ -116,8 +145,13 @@ describe("render", () => {
     const prevContent1 = root.querySelector("#content1");
     const prevContent2 = root.querySelector("#content2");
 
-    const child3 = createElement("div", { id: "content3" }, "3");
-    render(root, createElement("div", { id: "div-3" }, child3, child2));
+    render(
+      root,
+      <div id="div-3">
+        <div id="content3">3</div>
+        <span id="content2">2</span>
+      </div>,
+    );
     const currentContent2 = root.querySelector("#content2");
     const currentContent3 = root.querySelector("#content3");
 
@@ -131,22 +165,18 @@ describe("render", () => {
 
   it("should diff components", () => {
     const root = document.createElement("div");
-    const Foo = (props: any) => {
-      return createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", null, props.greet),
-        props.children,
-      );
-    };
+    const Foo = (props: any) => (
+      <div id="foo">
+        <span>{props.greet}</span>
+        {props.children}
+      </div>
+    );
 
     render(
       root,
-      createElement(
-        Foo,
-        { greet: "hello" },
-        createElement("span", null, "content1"),
-      ),
+      <Foo greet={"hello"}>
+        <span>content1</span>
+      </Foo>,
     );
 
     const prevContent = root.querySelector("#foo");
@@ -156,17 +186,15 @@ describe("render", () => {
 
     render(
       root,
-      createElement(
-        Foo,
-        { greet: "good" },
-        createElement("span", null, "content2"),
-      ),
+      <Foo greet={"good"}>
+        <span>content2</span>
+      </Foo>,
     );
     expect(root.innerHTML).toEqual(
       `<div id="foo"><span>good</span><span>content2</span></div>`,
     );
-    const currentContent = root.querySelector("#foo");
 
+    const currentContent = root.querySelector("#foo");
     expect(prevContent).toEqual(currentContent);
   });
 
@@ -175,12 +203,7 @@ describe("render", () => {
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "hello" },
-        createElement("span", null, "content1"),
-        "content2",
-      ),
+      <div id="hello"><span>content1</span>content2</div>
     );
 
     expect(root.innerHTML).toEqual(
@@ -190,28 +213,25 @@ describe("render", () => {
 
   it("should diff children with key", () => {
     const root = document.createElement("div");
+
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el1", key: "el1" }, "element1"),
-        createElement("span", { id: "el2", key: "el2" }, "element2"),
-        createElement("span", { id: "el3", key: "el3" }, "element3"),
-      ),
+      <div id="foo">
+        <span id="el1" key="el1">element1</span>
+        <span id="el2" key="el2">element2</span>
+        <span id="el3" key="el3">element3</span>
+      </div>
     );
 
     const prevEl3 = root.querySelector("#el3");
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el3", key: "el3" }, "element3"),
-        createElement("span", { id: "el4", key: "el4" }, "element4"),
-        createElement("span", { id: "el5", key: "el5" }, "element5"),
-      ),
+      <div id="foo">
+        <span id="el3" key="el3">element3</span>
+        <span id="el4" key="el4">element4</span>
+        <span id="el5" key="el5">element5</span>
+      </div>
     );
 
     const currentEl3 = root.querySelector("#el3");
@@ -226,13 +246,11 @@ describe("render", () => {
     const root = document.createElement("div");
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el1" }, "element1"),
-        createElement("span", { id: "el2" }, "element2"),
-        createElement("span", { id: "el3" }, "element3"),
-      ),
+      <div id="foo">
+        <span id="el1">element1</span>
+        <span id="el2">element2</span>
+        <span id="el3">element3</span>
+      </div>
     );
 
     const prevEl1 = root.querySelector("#el1");
@@ -241,13 +259,11 @@ describe("render", () => {
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el3" }, "element3"),
-        createElement("span", { id: "el2" }, "element2"),
-        createElement("span", { id: "el1" }, "element1"),
-      ),
+      <div id="foo">
+        <span id="el3">element3</span>
+        <span id="el2">element2</span>
+        <span id="el1">element1</span>
+      </div>
     );
 
     const currentEl1 = root.querySelector("#el1");
@@ -268,23 +284,19 @@ describe("render", () => {
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el1" }, "element1"),
-        createElement("span", { id: "el2" }, "element2"),
-        createElement("span", { id: "el3" }, "element3"),
-      ),
+      <div id="foo">
+        <span id="el1">element1</span>
+        <span id="el2">element2</span>
+        <span id="el3">element3</span>
+      </div>
     );
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el1" }, "element1"),
-        createElement("span", { id: "el2" }, "element2"),
-      ),
+      <div id="foo">
+        <span id="el1">element1</span>
+        <span id="el2">element2</span>
+      </div>
     );
 
     expect(root.innerHTML).toEqual(
@@ -297,22 +309,18 @@ describe("render", () => {
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el1" }, "element1"),
-      ),
+      <div id="foo">
+        <span id="el1">element1</span>
+      </div>
     );
     const prevEl1 = root.querySelector("#el1");
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el1" }, "element1"),
-        createElement("span", { id: "el2" }, "element2"),
-      ),
+      <div id="foo">
+        <span id="el1">element1</span>
+        <span id="el2">element2</span>
+      </div>
     );
 
     const currentEl1 = root.querySelector("#el1");
@@ -326,15 +334,13 @@ describe("render", () => {
   it("should diff children when prev children is null", () => {
     const root = document.createElement("div");
 
-    render(root, createElement("div", { id: "foo" }, ));
+    render(root, createElement("div", { id: "foo" }));
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el1" }, "element1"),
-      ),
+      <div id="foo">
+        <span id="el1">element1</span>
+      </div>
     );
 
     expect(root.innerHTML).toEqual(
@@ -347,11 +353,9 @@ describe("render", () => {
 
     render(
       root,
-      createElement(
-        "div",
-        { id: "foo" },
-        createElement("span", { id: "el1" }, "element1"),
-      ),
+      <div id="foo">
+        <span id="el1">element1</span>
+      </div>
     );
 
     render(root, createElement("div", { id: "foo" }));
