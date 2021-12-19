@@ -1,7 +1,7 @@
 import { VNode, AnyObject } from "./types";
 import { isEqual, isVNode } from "./utils";
 import { createTextVNode } from "./create-element";
-import {setCurrentVNode} from "./hooks";
+import { setCurrentVNode } from "./hooks";
 
 type FunctionVNode = Omit<VNode, "type"> & { type: Function };
 
@@ -24,6 +24,7 @@ export const diff = (
 
   if (typeof current.type === "function") {
     current._hooks = prev._hooks;
+    current._render = (next: VNode) => diff(parentEl, current, next);
 
     if (!(current.props || {}).key && current.type !== prev.type) {
       setChildren(current, [renderComponent(current as FunctionVNode)]);
