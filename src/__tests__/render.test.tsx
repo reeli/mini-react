@@ -1,6 +1,7 @@
 /* @jsx createElement */
 import { createElement } from "../create-element";
 import { render } from "../render";
+import { useState, useRef } from "../hooks";
 
 describe("render", () => {
   it("should handle html elements when first render", () => {
@@ -203,7 +204,9 @@ describe("render", () => {
 
     render(
       root,
-      <div id="hello"><span>content1</span>content2</div>
+      <div id="hello">
+        <span>content1</span>content2
+      </div>,
     );
 
     expect(root.innerHTML).toEqual(
@@ -217,10 +220,16 @@ describe("render", () => {
     render(
       root,
       <div id="foo">
-        <span id="el1" key="el1">element1</span>
-        <span id="el2" key="el2">element2</span>
-        <span id="el3" key="el3">element3</span>
-      </div>
+        <span id="el1" key="el1">
+          element1
+        </span>
+        <span id="el2" key="el2">
+          element2
+        </span>
+        <span id="el3" key="el3">
+          element3
+        </span>
+      </div>,
     );
 
     const prevEl3 = root.querySelector("#el3");
@@ -228,10 +237,16 @@ describe("render", () => {
     render(
       root,
       <div id="foo">
-        <span id="el3" key="el3">element3</span>
-        <span id="el4" key="el4">element4</span>
-        <span id="el5" key="el5">element5</span>
-      </div>
+        <span id="el3" key="el3">
+          element3
+        </span>
+        <span id="el4" key="el4">
+          element4
+        </span>
+        <span id="el5" key="el5">
+          element5
+        </span>
+      </div>,
     );
 
     const currentEl3 = root.querySelector("#el3");
@@ -250,7 +265,7 @@ describe("render", () => {
         <span id="el1">element1</span>
         <span id="el2">element2</span>
         <span id="el3">element3</span>
-      </div>
+      </div>,
     );
 
     const prevEl1 = root.querySelector("#el1");
@@ -263,7 +278,7 @@ describe("render", () => {
         <span id="el3">element3</span>
         <span id="el2">element2</span>
         <span id="el1">element1</span>
-      </div>
+      </div>,
     );
 
     const currentEl1 = root.querySelector("#el1");
@@ -288,7 +303,7 @@ describe("render", () => {
         <span id="el1">element1</span>
         <span id="el2">element2</span>
         <span id="el3">element3</span>
-      </div>
+      </div>,
     );
 
     render(
@@ -296,7 +311,7 @@ describe("render", () => {
       <div id="foo">
         <span id="el1">element1</span>
         <span id="el2">element2</span>
-      </div>
+      </div>,
     );
 
     expect(root.innerHTML).toEqual(
@@ -311,7 +326,7 @@ describe("render", () => {
       root,
       <div id="foo">
         <span id="el1">element1</span>
-      </div>
+      </div>,
     );
     const prevEl1 = root.querySelector("#el1");
 
@@ -320,7 +335,7 @@ describe("render", () => {
       <div id="foo">
         <span id="el1">element1</span>
         <span id="el2">element2</span>
-      </div>
+      </div>,
     );
 
     const currentEl1 = root.querySelector("#el1");
@@ -340,7 +355,7 @@ describe("render", () => {
       root,
       <div id="foo">
         <span id="el1">element1</span>
-      </div>
+      </div>,
     );
 
     expect(root.innerHTML).toEqual(
@@ -355,11 +370,72 @@ describe("render", () => {
       root,
       <div id="foo">
         <span id="el1">element1</span>
-      </div>
+      </div>,
     );
 
     render(root, createElement("div", { id: "foo" }));
 
     expect(root.innerHTML).toEqual(`<div id="foo"></div>`);
+  });
+});
+
+describe('#useState', () => {
+  it("should set state", () => {
+    const root = document.createElement("div");
+
+    const Foo = () => {
+      const [count1] = useState(10);
+      const [count2] = useState(8);
+      return (
+        <div>
+          <span id={"children1"}>{count1}</span>
+          <span id={"children2"}>{count2}</span>
+        </div>
+      );
+    };
+
+    render(root, <Foo />);
+
+    expect(root.innerHTML).toEqual(
+      `<div><span id="children1">10</span><span id="children2">8</span></div>`,
+    );
+  });
+});
+
+describe("#useRef", () => {
+  it("should set ref correctly", () => {
+    const root = document.createElement("div");
+    const refValue = { a: 10 };
+
+    const Foo = () => {
+      const myRef = useRef(refValue);
+      myRef.current.a = 20;
+
+      return <span>test</span>;
+    };
+
+    render(root, <Foo />);
+
+    expect(refValue.a).toEqual(20);
+  });
+
+  it("should get prev ref value correctly when rerender", () => {
+    const root = document.createElement("div");
+    let prevRefValue = 0;
+
+    const Foo = () => {
+      const myRef = useRef(10);
+      prevRefValue = myRef.current;
+
+      myRef.current = 20;
+
+      return <span>test</span>;
+    };
+
+    render(root, <Foo />);
+    expect(prevRefValue).toEqual(10);
+
+    render(root, <Foo />);
+    expect(prevRefValue).toEqual(20);
   });
 });
