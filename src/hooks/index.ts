@@ -1,4 +1,4 @@
-import { VNode } from "../types";
+import {VNode} from "../types";
 
 let currentVNode: VNode | null = null;
 let currentIdx: number = 0;
@@ -21,6 +21,8 @@ export const hookFactory = <T = any>(initHook: (currentVNode: VNode) => T) => {
 
   const current: any = currentVNode!._hooks![currentIdx];
   currentIdx = currentIdx + 1;
+
+  current.currentVNode = currentVNode
 
   return current as T;
 };

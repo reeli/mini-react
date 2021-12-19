@@ -36,14 +36,36 @@ describe("#useState", () => {
       const [count, setState] = useState(10);
       mySetState = setState;
 
-      return <span id={`${count}`}>{count}</span>;
+      return <span>{count}</span>;
     };
 
     render(root, <Foo />);
-    // expect(root.innerHTML).toEqual(`<span>10</span>`);
+    expect(root.innerHTML).toEqual(`<span>10</span>`);
 
     mySetState(20);
     expect(root.innerHTML).toEqual(`<span>20</span>`);
+  });
+
+  it("should set state two times correctly", () => {
+    const root = document.createElement("div");
+
+    let mySetState: any;
+
+    const Foo = () => {
+      const [count, setState] = useState(10);
+      mySetState = setState;
+
+      return <span>{count}</span>;
+    };
+
+    render(root, <Foo />);
+    expect(root.innerHTML).toEqual(`<span>10</span>`);
+
+    mySetState(20);
+    expect(root.innerHTML).toEqual(`<span>20</span>`);
+
+    mySetState(30);
+    expect(root.innerHTML).toEqual(`<span>30</span>`);
   });
 });
 

@@ -1,16 +1,17 @@
 import {hookFactory} from "./index";
 
 export const useState = <TValue = any>(initialValue?: TValue) => {
-  const res = hookFactory(() => {
-    let state = {
+  const res = hookFactory((currentVNode) => {
+    const state = {
       value: initialValue,
       setValue: (_value: TValue) => {},
+      currentVNode: currentVNode,
     };
 
     const setValue = (nextValue: TValue) => {
       // TODO: if value is equal to next value
       state.value = nextValue;
-      // currentVNode._render!(currentVNode);
+      state.currentVNode._render!();
     };
 
     state.setValue = setValue;
@@ -27,6 +28,6 @@ export const useRef = <T>(data: T) => {
       current: data,
     };
 
-    return refObj;
-  });
+    return {refObj};
+  }).refObj;
 };
