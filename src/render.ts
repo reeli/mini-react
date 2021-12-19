@@ -1,7 +1,7 @@
 import { VNode, AnyObject } from "./types";
 import { isEqual, isVNode } from "./utils";
 import { createTextVNode } from "./create-element";
-import { setCurrentVNode } from "./hooks";
+import {setCurrentVNode} from "./hooks";
 
 type FunctionVNode = Omit<VNode, "type"> & { type: Function };
 

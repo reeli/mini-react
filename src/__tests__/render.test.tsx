@@ -1,7 +1,7 @@
 /* @jsx createElement */
 import { createElement } from "../create-element";
 import { render } from "../render";
-import { useState, useRef } from "../hooks";
+import { useState, useRef } from "../hooks/hooks";
 
 describe("render", () => {
   it("should handle html elements when first render", () => {
