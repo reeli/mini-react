@@ -1,4 +1,4 @@
-import { VNode, Hook } from "./types";
+import { VNode } from "./types";
 
 let currentVNode: VNode | null = null;
 let currentIdx: number = 0;
@@ -11,36 +11,38 @@ export const setCurrentVNode = (v: VNode | null) => {
   }
 };
 
-export const useState = <TValue = any>(initialValue?: TValue): Hook => {
+const hookFactory = <T = any>(initHook: () => T) => {
   if (!currentVNode!._hooks![currentIdx]) {
-    let _value: TValue | undefined = initialValue;
-
-    const _setValue = (nextValue: TValue) => {
-      _value = nextValue;
-    };
-
-    const _hook: Hook = [_value, _setValue];
-
-    currentVNode!._hooks = [...currentVNode!._hooks!, _hook];
+    (currentVNode as any)!._hooks = [
+      ...(currentVNode as any)!._hooks,
+      initHook(),
+    ];
   }
 
-  const res = currentVNode!._hooks![currentIdx];
+  const current: any = currentVNode!._hooks![currentIdx];
   currentIdx = currentIdx + 1;
 
-  return res;
+  return current as T;
+};
+
+export const useState = <TValue = any>(initialValue?: TValue) => {
+  return hookFactory(() => {
+    let value: TValue | undefined = initialValue;
+
+    const setValue = (nextValue: TValue) => {
+      value = nextValue;
+    };
+
+    return [value, setValue] as const;
+  });
 };
 
 export const useRef = <T>(data: T) => {
-  if (!currentVNode!._hooks![currentIdx]) {
-    const refObj: any = {
+  return hookFactory(() => {
+    const refObj: { current: T } = {
       current: data,
     };
 
-    (currentVNode as any)!._hooks.push(refObj);
-  }
-
-  const res: any = currentVNode!._hooks![currentIdx];
-  currentIdx = currentIdx + 1;
-
-  return res as { current: T };
+    return refObj;
+  });
 };
