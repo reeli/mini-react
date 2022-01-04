@@ -193,9 +193,7 @@ describe("useEffect", () => {
     const Foo = () => {
       useEffect(() => {
         value = value + 1;
-        console.log("in useffect")
         return () => {
-          console.log("in cleanup")
           count = count + 1;
         };
       }, [num]);

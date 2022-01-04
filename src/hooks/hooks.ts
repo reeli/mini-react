@@ -19,7 +19,7 @@ export const useState = <TValue = any>(initialValue?: TValue) => {
     return state;
   });
 
-  return [res.value, res.setValue];
+  return [res.value!, res.setValue] as const;
 };
 
 export const useRef = <T>(data: T) => {
