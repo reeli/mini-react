@@ -1,7 +1,7 @@
 /* @jsx createElement */
 // @ts-ignore
 import { createElement } from "../../create-element";
-import { useState, useRef } from "../hooks";
+import { useState, useRef, useEffect } from "../hooks";
 import { render } from "../../render";
 
 describe("#useState", () => {
@@ -104,5 +104,112 @@ describe("#useRef", () => {
 
     render(root, <Foo />);
     expect(prevRefValue).toEqual(20);
+  });
+});
+
+describe("useEffect", () => {
+  it("should not invoke useEffect callback when first render", () => {
+    const root = document.createElement("div");
+    let value = 0;
+
+    const Foo = () => {
+      useEffect(() => {
+        value = value + 1;
+      }, []);
+
+      return <span>test</span>;
+    };
+
+    render(root, <Foo />);
+    expect(value).toEqual(1);
+  });
+
+  it("should not invoke useEffect callback if deps empty", () => {
+    const root = document.createElement("div");
+    let value = 0;
+
+    const Foo = () => {
+      useEffect(() => {
+        value = value + 1;
+      }, []);
+
+      return <span>test</span>;
+    };
+
+    render(root, <Foo />);
+    expect(value).toEqual(1);
+
+    render(root, <Foo />);
+    expect(value).toEqual(1);
+  });
+
+  it("should invoke useEffect callback if deps ist not change", () => {
+    const root = document.createElement("div");
+    let value = 0;
+    let count = 1;
+
+    const Foo = () => {
+      useEffect(() => {
+        value = value + 1;
+      }, [count]);
+
+      return <span>test</span>;
+    };
+
+    render(root, <Foo />);
+    expect(value).toEqual(1);
+
+    render(root, <Foo />);
+    expect(value).toEqual(1);
+  });
+
+  it("should invoke useEffect callback if deps changed", () => {
+    const root = document.createElement("div");
+    let value = 0;
+    let count = 0;
+
+    const Foo = () => {
+      useEffect(() => {
+        value = value + 1;
+      }, [count]);
+
+      return <span>test</span>;
+    };
+
+    render(root, <Foo />);
+    expect(value).toEqual(1);
+
+    count = 1;
+    render(root, <Foo />);
+    expect(value).toEqual(2);
+  });
+
+  it("should run cleanup function in useEffect", () => {
+    const root = document.createElement("div");
+    let value = 0;
+    let count = 0;
+    let num = 0;
+
+    const Foo = () => {
+      useEffect(() => {
+        value = value + 1;
+        console.log("in useffect")
+        return () => {
+          console.log("in cleanup")
+          count = count + 1;
+        };
+      }, [num]);
+
+      return <span>test</span>;
+    };
+
+    render(root, <Foo />);
+    expect(count).toEqual(0);
+    expect(value).toEqual(1);
+
+    num = 1;
+    render(root, <Foo />);
+    expect(count).toEqual(1);
+    expect(value).toEqual(2);
   });
 });

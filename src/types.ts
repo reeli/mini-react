@@ -13,7 +13,8 @@ export interface VNode {
   _children?: VNode[]; // output: type(props)
   _html?: HTMLElement | Text;
   _hooks?: Hook[];
-  _render?: ()=>any
+  _render?: () => any;
+  _pendingEffects?: any[];
 }
 
 export type ComponentVNode = Omit<VNode, "type"> & { type: Function };

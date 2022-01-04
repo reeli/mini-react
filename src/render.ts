@@ -1,7 +1,7 @@
-import {VNode, AnyObject} from "./types";
-import {isEqual, isVNode} from "./utils";
-import {createTextVNode} from "./create-element";
-import {setCurrentVNode} from "./hooks";
+import { VNode, AnyObject } from "./types";
+import { isEqual, isVNode } from "./utils";
+import { createTextVNode } from "./create-element";
+import { setCurrentVNode } from "./hooks";
 
 type FunctionVNode = Omit<VNode, "type"> & { type: Function };
 
@@ -11,8 +11,8 @@ const renderComponent = (parentEl: HTMLElement, vNode: FunctionVNode) => {
       type: vNode.type,
       props: vNode.props,
       _hooks: vNode._hooks,
-      _html: vNode._html
-    }
+      _html: vNode._html,
+    };
 
     setChildren(newNode, [renderComponent(parentEl, newNode as FunctionVNode)]);
     diffChildren(parentEl, vNode._children, newNode._children);
@@ -36,6 +36,7 @@ export const diff = (
 
   if (typeof current.type === "function") {
     current._hooks = prev._hooks;
+    current._pendingEffects = prev._pendingEffects;
 
     if (!(current.props || {}).key && current.type !== prev.type) {
       setChildren(current, [
@@ -186,6 +187,9 @@ const create = (
   if (typeof vNode.type === "function") {
     const _children = renderComponent(parentEl, vNode as FunctionVNode);
     vNode._children = [_children];
+    if (vNode._pendingEffects) {
+      vNode._pendingEffects.forEach((cb) => cb._value());
+    }
 
     create(parentEl, _children, beforeEl);
     return;
@@ -199,7 +203,7 @@ const create = (
   }
 
   const element = document.createElement(vNode.type);
-  const {children, key, ...otherProps} = vNode.props || {};
+  const { children, key, ...otherProps } = vNode.props || {};
 
   if (otherProps) {
     Object.keys(otherProps).forEach((key) => {

@@ -11,7 +11,7 @@ export const setCurrentVNode = (v: VNode | null) => {
   }
 };
 
-export const hookFactory = <T = any>(initHook: (currentVNode: VNode) => T) => {
+export const hookFactory = <T = any>(initHook: (currentVNode: VNode) => T,onReRender?:(currentVNode:VNode)=>T ) => {
   if (!currentVNode!._hooks![currentIdx]) {
     (currentVNode as any)!._hooks = [
       ...(currentVNode as any)!._hooks,
@@ -21,6 +21,8 @@ export const hookFactory = <T = any>(initHook: (currentVNode: VNode) => T) => {
 
   const current: any = currentVNode!._hooks![currentIdx];
   currentIdx = currentIdx + 1;
+
+  onReRender && onReRender(currentVNode as any);
 
   current.currentVNode = currentVNode
 
